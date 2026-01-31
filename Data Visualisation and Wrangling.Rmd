@@ -1,0 +1,236 @@
+---
+title: "Assignment 2"
+author: "Harsimran Ghai"
+date: "2026-01-31"
+output: html_document
+---
+
+#loading packages and libraries
+
+```{r}
+library (tidyverse)
+install.packages ("janitor",repos ="https://cloud.r-project.org")
+library (janitor)
+library (ggplot2)
+install.packages ("psych",repos ="https://cloud.r-project.org")
+library(psych)
+```
+
+# loading the data into R
+
+```{r}
+Demograph <- read_csv("assignment1_can_path_demographics.csv")
+Health <- read_csv("assignment1_can_path_health.csv")
+```
+
+# Look into the dataset/ structure of the dataset
+
+```{r}
+glimpse(Demograph)
+glimpse(Health)
+```
+
+The demograph dataset has three variables namely Subject ID, Gender and Income, whereas Income dataset has the following variables namely general health, vegetable quantity, Fruits quantity, physical activity, asthma and subject ID. 
+
+#checking the structure of the variables
+
+```{r}
+str(Demograph)
+str (Health)
+```
+
+The data is incorrectly characterizing categorical variables as numeric, therefore, the structure of categorical variables will be changed to factor, so that in future we can run the regression or other statistical techniques safely for variables that are categorical. Even though I am converting the variables into factor, but I am unable to label it as I need the codebook of the data to see which value correspond to what level of the category,.
+
+#Correction for categorical variables
+
+```{r}
+Demograph$SDC_GENDER <- factor(Demograph$SDC_GENDER)
+Demograph$SDC_INCOME <- factor(Demograph$SDC_INCOME)
+Health$HS_GEN_HEALTH <- factor(Health$HS_GEN_HEALTH)
+Health$DIS_ASTHMA_EVER <- factor(Health$DIS_ASTHMA_EVER)
+```
+
+#Inspecting duplicates
+
+```{r}
+get_dupes(Demograph)
+get_dupes(Health)
+```
+
+No duplicate observation were found in demograph and Health dataset.
+
+#Checking outliers in dataset
+
+```{r}
+# Select numeric variables
+boxplot(Health$PA_TOTAL_SHORT, main="PA_TOTAL_SHORT")
+boxplot(Health$NUT_VEG_QTY, main="Vegetable quantity")
+boxplot(Health$NUT_FRUITS_QTY, main="Fruits quantity")
+```
+
+All continuous variables that is fruits, vegetables and physical activities have potential outliers based on the boxplots.  
+
+
+# Merging two datasets together using subject ID 
+
+```{r}
+Final_data <- Demograph %>% left_join(Health, by ="ID")
+```
+
+#Validating the merging (Checking number of rows and variables in the dataset)
+
+```{r}
+nrow(Demograph)
+nrow(Health)
+nrow(Final_data)
+```
+ The new data has same number of rows as the orignal dataset has, indicating same observations. The number of variables are 8 in the final dataset, indicating the two variables in the demograph dataset, merged successfully with the health dataset.
+ 
+#Summary of data
+
+```{r}
+glimpse(Final_data)
+```
+
+#Checking missing data
+
+```{r}
+any(is.na(Final_data))
+colSums(is.na(Final_data))
+
+```
+Many observations are missing for each variables except gender and therefore required considerable thoughts on how to analyze this data. For example, we can use Imputations or complete case analysis. However the methods employed will generally be dictated by the proportion of missing data,and  type of missing data (MAR, MCAR or MNAR).
+
+# Basic descriptive statistics and data Visualisation
+
+#For Continuous variable
+
+```{r}
+#Physical Activity
+describe(Final_data$PA_TOTAL_SHORT)
+
+#Boxplot for Physical activity 
+boxplot(Final_data$PA_TOTAL_SHORT, main = "Physical Activity")
+hist(Final_data$PA_TOTAL_SHORT)
+```
+
+The mean of physical activity is 2574.09 and the median is 1782. The difference between the two central tendancy along with value of skewness (1.7) indicate that the distribution of the physical activity is skewed. The standard deviation is 2656.19 with minimum value of 0 and maximum value of 19278. Boxplots showed potential outliers in the variables.`
+
+```{r}
+#Vegetable
+describe(Final_data$NUT_VEG_QTY)
+#Boxplots
+boxplot(Final_data$NUT_VEG_QTY, main='Vegetable quantity')
+hist(Final_data$NUT_VEG_QTY)
+```
+
+The mean of vegetable variables is 2.67 and median is 2. The difference between the mean and median along with the value of skewness (2.45) indicate that the distribution of vegetable quantity variable is skewed. The standard deviation is 1.68 and the maximum value is 35 and the minimum value is 0. There are potential outliers in the dataset.
+
+```{r}
+#Fruits
+describe(Final_data$NUT_FRUITS_QTY)
+#Boxplots
+boxplot(Final_data$NUT_FRUITS_QTY, main='Fruits quantity')
+hist(Final_data$NUT_FRUITS_QTY)
+```
+
+The mean of fruit variable is 2.13 and median is 2. The distribution is skewed (1.64),  with standard deviation of 1.41 and minimum value of 0 and maximum value of 25. There are some potential outliers in the variables. 
+
+#For Categorical variables
+
+```{r}
+#Frequency and Proportion for Gender
+Final_data$SDC_GENDER <- factor(Final_data$SDC_GENDER, labels = c("Male", "Female"))
+
+table(Final_data$SDC_GENDER,useNA = 'ifany')
+prop.table(table(Final_data$SDC_GENDER,useNA = 'ifany'))
+
+#Bar Graph for Gender 
+library(ggplot2)
+ggplot(Final_data, aes(x = SDC_GENDER)) +
+  geom_bar() +
+  labs(title = "Count of subjects by Gender",
+       x = "Gender",
+       y = "Count") +
+  theme_minimal()
+```
+
+This study consist of 63% females and 37% males. 
+
+```{r}
+#Frequency and Proportion for Income
+table(Final_data$SDC_INCOME, useNA='ifany')
+prop.table (table(Final_data$SDC_INCOME, useNA='ifany'))
+
+#Bar Graph for Income
+ggplot(Final_data,aes(x= SDC_INCOME))+geom_bar()+labs(title='Bar Graph for Income',
+                                              x='Income Category',y= 'Count')+theme_minimal()
+```      
+
+The highest proportions is 19% for level 6 followed by level 4. The least proportion is for level 1, that is 0.012. 
+
+```{r}
+#Frequency and Proportion for HS_GEN_HEALTH
+table (Final_data$HS_GEN_HEALTH, useNA = 'ifany')
+prop.table (table(Final_data$HS_GEN_HEALTH,useNA='ifany'))
+
+#Bar graph for HS_GEN_HEALTH 
+ggplot (Final_data, aes(x=HS_GEN_HEALTH))+ geom_bar()+labs (title= 'Bar Graph for General Health',
+x= 'General Health category', y= 'Count') +theme_minimal()
+```
+
+The most proportion of people belong to level 4 of general health (that is 41%) followed by level 3 of general health (that is 31%). The least proportion of people belong to level 1 of general health (that is 0.02).
+
+```{r}
+#Frequency and Proportion for Asthma
+table(Final_data$DIS_ASTHMA_EVER, useNA='ifany')
+prop.table (table(Final_data$DIS_ASTHMA_EVER,useNA = 'ifany'))
+
+#Bar Graph for Asthma 
+ggplot (Final_data, aes(x=DIS_ASTHMA_EVER))+geom_bar() +labs(title=' Bar Graph for Asthma', x= 'Asthma', y='Counts' )+theme_minimal()
+```
+
+The most proportion of people belong to level 0 of asthma group (that is 0.81), followed by level 1 (that is 0.13).
+
+#Examining the relationship between Fruits and vegetables with Physical Activity using scatter plot
+
+```{r}
+#Physical Activity vs Vegetable quantity
+ggplot(Final_data, aes(x = PA_TOTAL_SHORT, y = NUT_VEG_QTY)) +
+  geom_point(color = "Red", size = 2) +
+  labs(title = "Scatter Plot: Physical Activity vs vegetable quantity",
+       x = "Physical Activity",
+       y = "Vegetable") +
+  theme_minimal()
+
+#Physical Activity vs Fruit quantity
+ggplot(Final_data, aes(x = PA_TOTAL_SHORT, y = NUT_FRUITS_QTY)) +
+  geom_point(color = "Red", size = 2) +
+  labs(title = "Scatter Plot: Physical Activity vs Fruits quantity",
+       x = "Physical Activity",
+       y = "Fruits") +
+  theme_minimal()
+```
+
+Based on the scatter plots, we can suspect no linear relationship between the variables. However, to confirm the findings it is important to do the correlation analysis that is robust to the outliers that is Spearman, Kendall correlation statistics
+
+#Correlation between continuous variables
+
+The correlation between vegetable quantity and physical activity using pearson correlation
+
+```{r}
+test<-cor.test(Final_data$PA_TOTAL_SHORT, Final_data$NUT_VEG_QTY)
+test$estimate
+test$p.value
+```
+
+The correlation between nut fruits and physical activity using pearson correlation
+
+```{r}
+test2<-cor.test(Final_data$PA_TOTAL_SHORT, Final_data$NUT_FRUITS_QTY)
+test2$estimate
+test2$p.value
+```
+
+
+

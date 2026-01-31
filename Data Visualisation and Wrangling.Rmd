@@ -216,7 +216,7 @@ Based on the scatter plots, we can suspect no linear relationship between the va
 
 #Correlation between continuous variables
 
-The correlation between vegetable quantity and physical activity using pearson correlation
+The correlation between vegetable quantity and physical activity 
 
 ```{r}
 test<-cor.test(Final_data$PA_TOTAL_SHORT, Final_data$NUT_VEG_QTY)
@@ -224,7 +224,7 @@ test$estimate
 test$p.value
 ```
 
-The correlation between nut fruits and physical activity using pearson correlation
+The correlation between nut fruits and physical activity 
 
 ```{r}
 test2<-cor.test(Final_data$PA_TOTAL_SHORT, Final_data$NUT_FRUITS_QTY)

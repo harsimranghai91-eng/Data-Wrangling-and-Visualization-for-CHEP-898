@@ -110,7 +110,7 @@ Many observations are missing for each variables except gender and therefore req
 describe(Final_data$PA_TOTAL_SHORT)
 
 #Boxplot for Physical activity 
-boxplot(Final_data$PA_TOTAL_SHORT, main = "Physical Activity")
+boxplot(Final_data$PA_TOTAL_SHORT, main = " Boxplot for Physical Activity")
 hist(Final_data$PA_TOTAL_SHORT)
 ```
 

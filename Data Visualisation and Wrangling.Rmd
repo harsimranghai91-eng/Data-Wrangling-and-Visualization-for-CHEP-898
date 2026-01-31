@@ -120,7 +120,7 @@ The mean of physical activity is 2574.09 and the median is 1782. The difference 
 #Vegetable
 describe(Final_data$NUT_VEG_QTY)
 #Boxplots
-boxplot(Final_data$NUT_VEG_QTY, main='Vegetable quantity')
+boxplot(Final_data$NUT_VEG_QTY, main=' boxplot for Vegetable quantity')
 hist(Final_data$NUT_VEG_QTY)
 ```
 
